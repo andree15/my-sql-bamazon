@@ -9,54 +9,64 @@ var connection = mysql.createConnection({
     password: "Nizlen5(",
     database: "bamazon_db"
 });
+
 connection.connect(function (err) {
     if (err) throw err;
-    start();
 });
 
-function start() {
-    inquirer
-      .prompt({
-        name: "listOfItems",
-        type: "confirm",
-        message: "Would you like to see the items available?",
-        choices: ["Y", "N"]
-      })
-      .then(function(answer) {
-        if (answer.listOfItems === "Y") {
-          listTable();
-        }
-        else if(answer.listOfItems === "N") {
-          connection.end();
-        }
-      });
-  }
+listTable()
 
-  function listTable(){
-    connection.query("SELECT * FROM products", function(err, results) {
+function listTable() {
+    connection.query("SELECT * FROM products", function (err, res) {
         if (err) throw err;
-        inquirer
-        .prompt([
-          {
-            name: "choice",
-            type: "rawlist",
-            choices: function() {
-              var choiceArray = [];
-              for (var i = 0; i < results.length; i++) {
-                choiceArray.push(results[i].item_name);
-              }
-              return choiceArray;
-            },
-            message: "What auction would you like to place a bid in?"
-          },
-          {
-            name: "bid",
-            type: "input",
-            message: "How much would you like to bid?"
-          }
-        ])
-.then
-
-
+        for (let i = 0; i < res.length; i++) {
+            console.log("Item #: " + res[i].ID + " | " +
+                "Product: " + res[i].product_name + " | " +
+                "Department: " + res[i].department_name + " | " +
+                "Price: " + "$" + res[i].price + " | " +
+                "In Stock: " + res[i].stock_quantity);
+        }
+        buyItem()
     }
-    )}
+    )
+
+}
+
+let buyItem = function () {
+    inquirer.prompt([
+        {
+            name: "item_ID",
+            type: "input",
+            message: "What is the # of the item you would like to buy?",
+        },
+        {
+            name: "quantity",
+            type: "input",
+            message: "how many units?",
+        }])
+        .then(function (answer) {
+            connection.query("select * from products", function (err, res) {
+                if (err) throw (err);
+
+                var chosenItem = [];
+                for (let i = 0; i < res.length; i++) {
+                    if (res[i].item_id === parseInt(answer.itemId)) {
+                        chosenItem = res[i];
+                    }
+                }
+                if (chosenItem.stock_quantity > parseInt(answer.quantity)) {
+                    connection.query(
+                        "upddate products ? where ?", [{
+                            stock_quantity: (chosenItem.stock_quantity - parseInt(answer.quantity))
+                        }]
+                    )
+                }
+
+
+
+
+
+            })
+
+
+        }
