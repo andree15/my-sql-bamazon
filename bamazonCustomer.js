@@ -45,21 +45,23 @@ let buyItem = function () {
             message: "how many units?",
         }])
         .then(function (answer) {
-            connection.query("select * from products", function (err, res) {
+            connection.query("select * from products WHERE ID = ?",[answer.item_ID], function (err, res) {
                 if (err) throw (err);
-
-                var chosenItem = [];
-                for (let i = 0; i < res.length; i++) {
-                    if (res[i].item_id === parseInt(answer.itemId)) {
-                        chosenItem = res[i];
-                    }
-                }
-                if (chosenItem.stock_quantity > parseInt(answer.quantity)) {
+                console.log(res)
+                var chosenItem=res[0];
+                console.log(chosenItem)
+                if (chosenItem.stock_quantity >= parseInt(answer.quantity)) {
                     connection.query(
-                        "upddate products ? where ?", [{
+                        "update products set ? where ID = ?", [{
                             stock_quantity: (chosenItem.stock_quantity - parseInt(answer.quantity))
-                        }]
-                    )
+                        }, chosenItem.ID],
+                        (err2,res2)=>{
+                            console.log(res2)
+                            console.log("the price is :" + chosenItem.price * parseInt(answer.quantity))
+                        })
+
+                }else{
+                    console.log("you want too much")
                 }
 
 
@@ -69,4 +71,5 @@ let buyItem = function () {
             })
 
 
-        }
+        })
+    }
