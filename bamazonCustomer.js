@@ -37,27 +37,24 @@ let buyItem = function () {
         {
             name: "item_ID",
             type: "input",
-            message: "What is the # of the item you would like to buy?",
+            message: "What is the Item # you would like to buy?",
         },
         {
             name: "quantity",
             type: "input",
-            message: "how many units?",
+            message: "How many units would you like to purchase?",
         }])
         .then(function (answer) {
             connection.query("select * from products WHERE ID = ?",[answer.item_ID], function (err, res) {
                 if (err) throw (err);
-                console.log(res)
                 var chosenItem=res[0];
-                console.log(chosenItem)
                 if (chosenItem.stock_quantity >= parseInt(answer.quantity)) {
                     connection.query(
                         "update products set ? where ID = ?", [{
                             stock_quantity: (chosenItem.stock_quantity - parseInt(answer.quantity))
                         }, chosenItem.ID],
                         (err2,res2)=>{
-                            console.log(res2)
-                            console.log("the price is :" + chosenItem.price * parseInt(answer.quantity))
+                            console.log("Your total is : $" + chosenItem.price * parseInt(answer.quantity))
                         })
 
                 }else{
